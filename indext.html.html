@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>บันทึกประจำวัน — โภชนาการ & เทรน</title>
+<style>
+  :root{
+    --bg:#f4f7f5;
+    --card:#ffffff;
+    --primary:#1f7a5c;
+    --primary-dark:#155c44;
+    --accent:#e8f3ee;
+    --text:#1b2320;
+    --muted:#6b7570;
+    --border:#dbe4df;
+    --danger:#c0392b;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans Thai",sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    padding:16px;
+  }
+  .container{
+    max-width:560px;
+    margin:0 auto;
+  }
+  h1{
+    font-size:1.4rem;
+    margin:4px 0 2px;
+  }
+  .subtitle{
+    color:var(--muted);
+    font-size:0.9rem;
+    margin:0 0 18px;
+    line-height:1.5;
+  }
+  .card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:16px;
+    margin-bottom:14px;
+  }
+  label{
+    display:block;
+    font-weight:600;
+    font-size:0.9rem;
+    margin:12px 0 6px;
+  }
+  label:first-child{margin-top:0;}
+  input[type="text"],
+  input[type="number"],
+  input[type="date"],
+  select,
+  textarea{
+    width:100%;
+    padding:11px 12px;
+    border:1px solid var(--border);
+    border-radius:10px;
+    font-size:1rem;
+    background:#fff;
+    color:var(--text);
+    font-family:inherit;
+  }
+  textarea{resize:vertical;}
+  input:focus, select:focus, textarea:focus{
+    outline:none;
+    border-color:var(--primary);
+  }
+  .toggle-group{
+    display:flex;
+    gap:8px;
+  }
+  .toggle-btn{
+    flex:1;
+    padding:12px 8px;
+    border:1px solid var(--border);
+    border-radius:10px;
+    background:#fff;
+    font-size:1rem;
+    font-weight:600;
+    color:var(--muted);
+    cursor:pointer;
+  }
+  .toggle-btn.active{
+    background:var(--primary);
+    border-color:var(--primary);
+    color:#fff;
+  }
+  .meal-row{
+    display:flex;
+    gap:8px;
+    margin-bottom:8px;
+    align-items:center;
+  }
+  .meal-row select{
+    flex:0 0 100px;
+  }
+  .meal-row input{
+    flex:1;
+  }
+  .remove-meal{
+    flex:0 0 auto;
+    background:none;
+    border:none;
+    color:var(--danger);
+    font-size:1.3rem;
+    cursor:pointer;
+    padding:4px 8px;
+  }
+  .secondary-btn{
+    width:100%;
+    padding:11px;
+    border:1px dashed var(--primary);
+    border-radius:10px;
+    background:var(--accent);
+    color:var(--primary-dark);
+    font-weight:600;
+    font-size:0.95rem;
+    cursor:pointer;
+    margin-top:4px;
+  }
+  .primary-btn{
+    width:100%;
+    padding:14px;
+    border:none;
+    border-radius:12px;
+    background:var(--primary);
+    color:#fff;
+    font-weight:700;
+    font-size:1.05rem;
+    cursor:pointer;
+    margin-top:8px;
+  }
+  .primary-btn:active{
+    background:var(--primary-dark);
+  }
+  .energy-row{
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+  .energy-row input[type="range"]{
+    flex:1;
+  }
+  #energyLabel{
+    font-weight:700;
+    font-size:1.1rem;
+    color:var(--primary-dark);
+    min-width:24px;
+    text-align:center;
+  }
+  .checkbox-row{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-top:14px;
+  }
+  .checkbox-row input{
+    width:20px;
+    height:20px;
+  }
+  .checkbox-row label{
+    margin:0;
+    font-weight:500;
+  }
+  #outputSection textarea{
+    font-family:ui-monospace,Menlo,Consolas,monospace;
+    font-size:0.85rem;
+    line-height:1.5;
+    background:var(--accent);
+  }
+  #copyStatus{
+    text-align:center;
+    color:var(--primary-dark);
+    font-weight:600;
+    min-height:1.2em;
+    margin:8px 0 0;
+  }
+  .hint{
+    font-size:0.8rem;
+    color:var(--muted);
+    margin-top:4px;
+  }
+  .water-total{
+    font-size:2rem;
+    font-weight:800;
+    color:var(--primary-dark);
+    text-align:center;
+    margin:6px 0 8px;
+  }
+  .progress-track{
+    width:100%;
+    height:14px;
+    background:var(--accent);
+    border-radius:999px;
+    overflow:hidden;
+    border:1px solid var(--border);
+  }
+  .progress-fill{
+    height:100%;
+    background:var(--primary);
+    width:0%;
+    transition:width 0.25s ease;
+  }
+  .quick-add-row{
+    display:flex;
+    gap:8px;
+    margin-top:14px;
+  }
+  .quick-btn{
+    flex:1;
+    padding:10px 4px;
+    border:1px solid var(--primary);
+    border-radius:10px;
+    background:var(--accent);
+    color:var(--primary-dark);
+    font-weight:700;
+    font-size:0.95rem;
+    line-height:1.3;
+    cursor:pointer;
+  }
+  .quick-btn span{
+    display:block;
+    font-weight:500;
+    font-size:0.7rem;
+    color:var(--muted);
+  }
+  .water-actions{
+    display:flex;
+    justify-content:space-between;
+    margin-top:10px;
+  }
+  .link-btn{
+    background:none;
+    border:none;
+    color:var(--muted);
+    font-size:0.85rem;
+    text-decoration:underline;
+    cursor:pointer;
+    padding:6px 2px;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>📋 บันทึกประจำวัน</h1>
+  <p class="subtitle">กรอกข้อมูลวันนี้ → กด "สร้างข้อความ" → คัดลอก → วางในแชท Claude เพื่อบันทึกลงโปรเจกต์จริง</p>
+
+  <div class="card">
+    <label>วันที่</label>
+    <input type="date" id="date">
+
+    <label>น้ำหนักตัว (กก.)</label>
+    <input type="number" id="weight" step="0.1" inputmode="decimal" placeholder="เช่น 108.5">
+    <p class="hint" id="waterTargetHint">เป้าหมายน้ำวันนี้: กรอกน้ำหนักก่อน</p>
+
+    <label>วันนี้เป็นวันเทรนหรือวันพัก?</label>
+    <div class="toggle-group">
+      <button type="button" class="toggle-btn" data-value="เทรน" id="btnTrain">🏋️ เทรน</button>
+      <button type="button" class="toggle-btn" data-value="พัก" id="btnRest">😴 พัก</button>
+    </div>
+
+    <div id="trainSection" style="display:none;">
+      <label>ท่าที่ยกวันนี้</label>
+      <select id="lift">
+        <option value="">เลือกท่า</option>
+        <option>Squat</option>
+        <option>Bench Press</option>
+        <option>Deadlift</option>
+        <option>Overhead Press</option>
+        <option value="อื่นๆ">อื่นๆ</option>
+      </select>
+      <label>น้ำหนัก/เซต/เรพ (ถ้ามี)</label>
+      <input type="text" id="liftDetail" placeholder="เช่น 140kg x 3 x 5">
+    </div>
+  </div>
+
+  <div class="card">
+    <label style="margin-top:0;">มื้ออาหาร</label>
+    <div id="meals"></div>
+    <button type="button" id="addMeal" class="secondary-btn">+ เพิ่มมื้ออาหาร</button>
+    <p class="hint">พิมพ์รายการแบบสบายๆ ได้เลย เช่น "อกไก่ย่าง 200g + ข้าวกล้อง 1 ถ้วย" Claude จะคำนวณแคลอรี่ให้เอง</p>
+  </div>
+
+  <div class="card">
+    <label style="margin-top:0;">น้ำดื่มวันนี้</label>
+    <div class="water-total" id="waterTotalDisplay">0 ml</div>
+    <div class="progress-track"><div class="progress-fill" id="waterProgressFill"></div></div>
+    <p class="hint" id="waterTargetLine" style="text-align:center;">เป้าหมาย: กรอกน้ำหนักด้านบนก่อน</p>
+
+    <div class="quick-add-row">
+      <button type="button" class="quick-btn" data-amt="150">+150<span>แก้วเล็ก</span></button>
+      <button type="button" class="quick-btn" data-amt="250">+250<span>แก้ว</span></button>
+      <button type="button" class="quick-btn" data-amt="500">+500<span>ขวด</span></button>
+    </div>
+
+    <label>หรือเลื่อนเลือกปริมาณเอง</label>
+    <div class="energy-row">
+      <input type="range" id="waterSlider" min="0" max="1000" step="50" value="250">
+      <div id="waterSliderLabel">250 ml</div>
+    </div>
+    <button type="button" id="addWaterCustom" class="secondary-btn">➕ เพิ่มปริมาณที่เลื่อนไว้</button>
+
+    <div class="water-actions">
+      <button type="button" id="undoWater" class="link-btn">↩️ ลบล่าสุด</button>
+      <button type="button" id="resetWater" class="link-btn">🔄 รีเซ็ตวันนี้</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <label style="margin-top:0;">ก้าวเดิน (ถ้ามี)</label>
+    <input type="number" id="steps" inputmode="numeric" placeholder="เช่น 8500">
+
+    <label>ชั่วโมงนอน (ถ้ามี)</label>
+    <input type="number" id="sleep" step="0.5" inputmode="decimal" placeholder="เช่น 7">
+
+    <label>พลังงาน / ความหิว (1 = แย่, 5 = ดีมาก)</label>
+    <div class="energy-row">
+      <input type="range" id="energy" min="1" max="5" value="3">
+      <div id="energyLabel">3</div>
+    </div>
+
+    <div class="checkbox-row">
+      <input type="checkbox" id="creatine">
+      <label for="creatine">กินครีเอทีนแล้ว</label>
+    </div>
+
+    <label>หมายเหตุอื่นๆ</label>
+    <textarea id="notes" rows="2" placeholder="เช่น รู้สึกล้าเพราะนอนน้อย"></textarea>
+  </div>
+
+  <button type="button" id="generateBtn" class="primary-btn">✅ สร้างข้อความ</button>
+
+  <div id="outputSection" class="card" style="display:none;">
+    <label style="margin-top:0;">ข้อความสำหรับวางในแชท Claude</label>
+    <textarea id="output" rows="14" readonly></textarea>
+    <button type="button" id="copyBtn" class="primary-btn">📋 คัดลอกข้อความ</button>
+    <p id="copyStatus"></p>
+  </div>
+</div>
+
+<script>
+(function(){
+  var dateInput = document.getElementById('date');
+  var today = new Date();
+  var yyyy = today.getFullYear();
+  var mm = String(today.getMonth()+1).padStart(2,'0');
+  var dd = String(today.getDate()).padStart(2,'0');
+  dateInput.value = yyyy + '-' + mm + '-' + dd;
+
+  var dayType = '';
+  var btnTrain = document.getElementById('btnTrain');
+  var btnRest = document.getElementById('btnRest');
+  var trainSection = document.getElementById('trainSection');
+  var weightInput = document.getElementById('weight');
+  var waterTargetHint = document.getElementById('waterTargetHint');
+  var currentWaterTarget = null;
+
+  // ----- น้ำดื่ม: บันทึกเพิ่มได้เรื่อยๆ ระหว่างวัน แล้วรวมยอดตอนสร้างข้อความสรุป -----
+  var waterEntries = [];
+  var waterTotalDisplay = document.getElementById('waterTotalDisplay');
+  var waterProgressFill = document.getElementById('waterProgressFill');
+  var waterTargetLine = document.getElementById('waterTargetLine');
+  var waterSlider = document.getElementById('waterSlider');
+  var waterSliderLabel = document.getElementById('waterSliderLabel');
+
+  function waterTotal(){
+    return waterEntries.reduce(function(sum, v){ return sum + v; }, 0);
+  }
+
+  function updateWaterUI(){
+    var total = waterTotal();
+    waterTotalDisplay.textContent = total.toLocaleString() + ' ml';
+    if(currentWaterTarget){
+      var pct = Math.min(100, Math.round((total / currentWaterTarget) * 100));
+      waterProgressFill.style.width = pct + '%';
+      waterTargetLine.textContent = 'เป้าหมาย: ~' + currentWaterTarget.toLocaleString() + ' ml (' + pct + '%)';
+    } else {
+      waterProgressFill.style.width = '0%';
+      waterTargetLine.textContent = 'เป้าหมาย: กรอกน้ำหนักด้านบนก่อน';
+    }
+  }
+
+  function addWater(amount){
+    if(!amount || amount <= 0) return;
+    waterEntries.push(amount);
+    updateWaterUI();
+  }
+
+  document.querySelectorAll('.quick-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      addWater(parseInt(btn.getAttribute('data-amt'), 10));
+    });
+  });
+
+  waterSlider.addEventListener('input', function(){
+    waterSliderLabel.textContent = waterSlider.value + ' ml';
+  });
+
+  document.getElementById('addWaterCustom').addEventListener('click', function(){
+    addWater(parseInt(waterSlider.value, 10));
+  });
+
+  document.getElementById('undoWater').addEventListener('click', function(){
+    waterEntries.pop();
+    updateWaterUI();
+  });
+
+  document.getElementById('resetWater').addEventListener('click', function(){
+    waterEntries = [];
+    updateWaterUI();
+  });
+
+  function computeWaterTarget(){
+    var w = parseFloat(weightInput.value);
+    if(!w || w <= 0){
+      currentWaterTarget = null;
+      waterTargetHint.textContent = 'เป้าหมายน้ำวันนี้: กรอกน้ำหนักก่อน';
+      updateWaterUI();
+      return;
+    }
+    var base = w * 35;
+    var extra = (dayType === 'เทรน') ? 550 : 0;
+    var target = Math.round((base + extra) / 50) * 50;
+    currentWaterTarget = target;
+    var label = 'เป้าหมายน้ำวันนี้: ~' + target.toLocaleString() + ' ml';
+    if(dayType === 'เทรน') label += ' (รวมชดเชยเหงื่อวันเทรน)';
+    waterTargetHint.textContent = label;
+    updateWaterUI();
+  }
+
+  function setDayType(val){
+    dayType = val;
+    btnTrain.classList.toggle('active', val === 'เทรน');
+    btnRest.classList.toggle('active', val === 'พัก');
+    trainSection.style.display = (val === 'เทรน') ? 'block' : 'none';
+    computeWaterTarget();
+  }
+  btnTrain.addEventListener('click', function(){ setDayType('เทรน'); });
+  btnRest.addEventListener('click', function(){ setDayType('พัก'); });
+  weightInput.addEventListener('input', computeWaterTarget);
+  updateWaterUI();
+
+  var mealsContainer = document.getElementById('meals');
+  var mealTypes = ['เช้า','กลางวัน','เย็น','ของว่าง'];
+
+  function addMealRow(){
+    var row = document.createElement('div');
+    row.className = 'meal-row';
+
+    var select = document.createElement('select');
+    mealTypes.forEach(function(t){
+      var opt = document.createElement('option');
+      opt.value = t;
+      opt.textContent = t;
+      select.appendChild(opt);
+    });
+
+    var input = document.createElement('input');
+    input.type = 'text';
+    input.placeholder = 'เช่น ไข่ต้ม 2 ฟอง + ข้าวกล้อง 1 ถ้วย';
+
+    var removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.className = 'remove-meal';
+    removeBtn.textContent = '✕';
+    removeBtn.addEventListener('click', function(){
+      mealsContainer.removeChild(row);
+    });
+
+    row.appendChild(select);
+    row.appendChild(input);
+    row.appendChild(removeBtn);
+    mealsContainer.appendChild(row);
+  }
+
+  document.getElementById('addMeal').addEventListener('click', addMealRow);
+  addMealRow();
+  addMealRow();
+  addMealRow();
+
+  var energyInput = document.getElementById('energy');
+  var energyLabel = document.getElementById('energyLabel');
+  energyInput.addEventListener('input', function(){
+    energyLabel.textContent = energyInput.value;
+  });
+
+  document.getElementById('generateBtn').addEventListener('click', function(){
+    var lines = [];
+    lines.push('บันทึกวันที่ ' + dateInput.value);
+
+    var weight = document.getElementById('weight').value;
+    if(weight) lines.push('น้ำหนัก: ' + weight + ' กก.');
+
+    if(dayType === 'เทรน'){
+      var lift = document.getElementById('lift').value;
+      var liftDetail = document.getElementById('liftDetail').value;
+      var liftLine = 'วันนี้: วันเทรน';
+      if(lift) liftLine += ' - ท่า ' + lift;
+      if(liftDetail) liftLine += ' (' + liftDetail + ')';
+      lines.push(liftLine);
+    } else if(dayType === 'พัก'){
+      lines.push('วันนี้: วันพัก');
+    }
+
+    var mealRows = mealsContainer.querySelectorAll('.meal-row');
+    var mealLines = [];
+    mealRows.forEach(function(row){
+      var type = row.querySelector('select').value;
+      var text = row.querySelector('input').value.trim();
+      if(text){
+        mealLines.push('- ' + type + ': ' + text);
+      }
+    });
+    if(mealLines.length > 0){
+      lines.push('มื้ออาหาร:');
+      lines = lines.concat(mealLines);
+    }
+
+    var steps = document.getElementById('steps').value;
+    if(steps) lines.push('ก้าวเดิน: ' + steps);
+
+    var sleep = document.getElementById('sleep').value;
+    if(sleep) lines.push('นอน: ' + sleep + ' ชม.');
+
+    var waterSum = waterTotal();
+    if(waterSum > 0){
+      var waterLine = 'น้ำดื่ม: ' + waterSum.toLocaleString() + ' ml';
+      if(currentWaterTarget) waterLine += ' (เป้าหมาย ~' + currentWaterTarget.toLocaleString() + ' ml)';
+      lines.push(waterLine);
+    }
+
+    lines.push('พลังงาน/หิว: ' + energyInput.value + '/5');
+
+    var creatine = document.getElementById('creatine').checked;
+    lines.push('ครีเอทีน: ' + (creatine ? 'กินแล้ว' : 'ยังไม่ได้กิน'));
+
+    var notes = document.getElementById('notes').value.trim();
+    if(notes) lines.push('หมายเหตุ: ' + notes);
+
+    var text = lines.join('\n');
+    document.getElementById('output').value = text;
+    document.getElementById('outputSection').style.display = 'block';
+    document.getElementById('outputSection').scrollIntoView({behavior:'smooth', block:'start'});
+    document.getElementById('copyStatus').textContent = '';
+  });
+
+  document.getElementById('copyBtn').addEventListener('click', function(){
+    var output = document.getElementById('output');
+    var status = document.getElementById('copyStatus');
+    output.focus();
+    output.select();
+    output.setSelectionRange(0, 999999);
+
+    function fallbackCopy(){
+      try{
+        document.execCommand('copy');
+        return true;
+      }catch(e){
+        return false;
+      }
+    }
+
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(output.value).then(function(){
+        status.textContent = '✓ คัดลอกแล้ว ไปวางในแชท Claude ได้เลย';
+      }).catch(function(){
+        if(fallbackCopy()){
+          status.textContent = '✓ คัดลอกแล้ว ไปวางในแชท Claude ได้เลย';
+        }else{
+          status.textContent = 'คัดลอกไม่สำเร็จ กรุณาเลือกข้อความด้านบนแล้วคัดลอกเอง';
+        }
+      });
+    } else {
+      if(fallbackCopy()){
+        status.textContent = '✓ คัดลอกแล้ว ไปวางในแชท Claude ได้เลย';
+      }else{
+        status.textContent = 'คัดลอกไม่สำเร็จ กรุณาเลือกข้อความด้านบนแล้วคัดลอกเอง';
+      }
+    }
+  });
+})();
+</script>
+</body>
+</html>
