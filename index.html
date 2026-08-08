@@ -157,6 +157,66 @@
   #doneScreen h2{color:var(--navy); margin:6px 0;}
   #doneScreen p{color:var(--muted); font-size:14px;}
 
+  /* ---- Mode toggle ---- */
+  .mode-toggle{display:flex; gap:8px; margin-bottom:16px;}
+  .mode-btn{
+    flex:1; padding:14px 8px; border-radius:16px; border:2px solid var(--line); background:#fff;
+    color:var(--navy); font-size:14px; font-weight:700; cursor:pointer; transition:.15s;
+    display:flex; flex-direction:column; align-items:center; gap:4px;
+  }
+  .mode-btn .mode-ic{font-size:22px;}
+  .mode-btn.active{ background:linear-gradient(135deg,var(--teal),var(--teal-dark)); border-color:var(--teal-dark); color:#fff; box-shadow:0 6px 14px rgba(15,155,142,.3);}
+
+  /* ---- Spelling game screen ---- */
+  #gameScreen{display:none;}
+  .game-card{
+    background:var(--card); border-radius:24px; box-shadow:var(--shadow);
+    padding:24px 18px; text-align:center; position:relative; border:1px solid var(--line);
+  }
+  .lives-row{ display:flex; justify-content:center; gap:4px; font-size:20px; margin-bottom:6px; letter-spacing:2px;}
+  .lives-row .lost{ opacity:.2; filter:grayscale(1); }
+  .game-meaning{ font-size:23px; font-weight:800; color:var(--navy); margin:6px 0 2px;}
+  .game-pos-row{display:flex; justify-content:center; gap:8px; margin-bottom:14px;}
+  .blanks-row{
+    display:flex; flex-wrap:wrap; justify-content:center; gap:8px; margin:14px 0 18px;
+  }
+  .letter-box{
+    min-width:30px; height:42px; border-bottom:3px solid var(--navy); display:flex; align-items:center;
+    justify-content:center; font-size:24px; font-weight:800; color:var(--navy); text-transform:uppercase;
+  }
+  .letter-box.space{ border-bottom:none; width:16px; min-width:16px;}
+  .letter-box.reveal-anim{ animation:popIn .25s ease; }
+  @keyframes popIn{ from{transform:scale(.5); opacity:0;} to{transform:scale(1); opacity:1;} }
+
+  .keyboard{
+    display:flex; flex-wrap:wrap; justify-content:center; gap:6px; margin-top:10px;
+  }
+  .key-btn{
+    width:32px; height:38px; border-radius:8px; border:none; background:#eef6fb; color:var(--navy);
+    font-size:15px; font-weight:700; cursor:pointer;
+  }
+  .key-btn.correct{ background:var(--green); color:#fff; }
+  .key-btn.wrong{ background:#e2e2e2; color:#999; }
+  .key-btn:disabled{ cursor:default; }
+
+  .game-msg{ min-height:26px; font-size:15px; font-weight:700; margin-top:12px; }
+  .game-msg.win{ color:var(--green-dark); }
+  .game-msg.lose{ color:var(--red-dark); }
+
+  .game-reveal{ display:none; margin-top:12px; text-align:left; animation:fadeIn .25s ease; }
+  .game-reveal .ex-box{ background:#f5fbff; border-radius:12px; padding:10px 14px; font-size:14px; color:var(--ink); border-left:4px solid var(--teal); }
+
+  .next-word-btn{
+    margin-top:16px; padding:12px 28px; border-radius:999px; border:none;
+    background:var(--navy); color:#fff; font-size:15px; font-weight:700; cursor:pointer; display:none;
+  }
+
+  .skip-btn{
+    margin-top:14px; padding:9px 20px; border-radius:999px; border:2px solid var(--line);
+    background:#fff8ee; color:#a5720b; font-size:13.5px; font-weight:700; cursor:pointer;
+  }
+  .skip-btn:active{ background:#ffe9c4; }
+
   footer{ text-align:center; font-size:11.5px; color:var(--muted); margin-top:24px; }
 </style>
 </head>
@@ -174,10 +234,19 @@
   <!-- ============ SETUP SCREEN ============ -->
   <div id="setupScreen">
 
+    <div class="mode-toggle">
+      <button class="mode-btn active" id="modeFlashBtn" data-mode="flashcard">
+        <span class="mode-ic">📖</span> ท่องศัพท์ (การ์ด)
+      </button>
+      <button class="mode-btn" id="modeGameBtn" data-mode="game">
+        <span class="mode-ic">🎮</span> เกมสะกดคำ
+      </button>
+    </div>
+
     <div class="card-box">
       <div class="quiz-highlight">
-        <div class="big">🗓️ ควิซสัปดาห์นี้แนะนำ: หน้าที่ 6</div>
-        <div class="hint">ท่องและควิซอาทิตย์ละ 1 หน้า — ใส่เลขหน้าด้านล่างให้ตรงกับที่ท่องไปแล้ว หรือเลือก Unit/หมวดหมู่เพื่อทบทวนคำเก่าก็ได้</div>
+        <div class="big" id="modeHint">🗓️ ควิซสัปดาห์นี้แนะนำ: หน้าที่ 6</div>
+        <div class="hint" id="modeHintSub">ท่องและควิซอาทิตย์ละ 1 หน้า — ใส่เลขหน้าด้านล่างให้ตรงกับที่ท่องไปแล้ว หรือเลือก Unit/หมวดหมู่เพื่อทบทวนคำเก่าก็ได้</div>
       </div>
     </div>
 
@@ -254,11 +323,49 @@
     </div>
   </div>
 
+  <!-- ============ SPELLING GAME SCREEN ============ -->
+  <div id="gameScreen">
+    <button class="back-link" id="gameBackBtn">← กลับไปตั้งค่า</button>
+    <div class="progress-wrap">
+      <div class="progress-bar"><div class="progress-fill" id="gameProgressFill"></div></div>
+      <div class="progress-text"><span id="gameSolvedCount">0</span>/<span id="gameTotalCount">0</span> คำ</div>
+    </div>
+
+    <div class="game-card" id="gameCard">
+      <div class="tag-row">
+        <span class="pill" id="gamePageTag">หน้า -</span>
+        <span class="pill" id="gameUnitTag">Unit -</span>
+      </div>
+      <div class="lives-row" id="livesRow"></div>
+
+      <div class="game-pos-row">
+        <span class="pos-badge" id="gamePos">n.</span>
+      </div>
+      <div class="game-meaning" id="gameMeaning">ความหมาย</div>
+
+      <div class="blanks-row" id="blanksRow"></div>
+
+      <div class="keyboard" id="keyboard"></div>
+
+      <button class="skip-btn" id="skipWordBtn">⏭️ ข้าม (นึกไม่ออก)</button>
+
+      <div class="game-msg" id="gameMsg"></div>
+
+      <div class="game-reveal" id="gameReveal">
+        <div class="ex-box">
+          <div id="gameExampleEn" style="font-style:italic;"></div>
+        </div>
+      </div>
+
+      <button class="next-word-btn" id="nextWordBtn">คำต่อไป ▶</button>
+    </div>
+  </div>
+
   <!-- ============ DONE SCREEN ============ -->
   <div id="doneScreen">
     <div class="card-box">
-      <div class="big-emoji">🎉🐋</div>
-      <h2>เก่งมาก! จำได้ครบทุกคำแล้ว</h2>
+      <div class="big-emoji" id="doneEmoji">🎉🐋</div>
+      <h2 id="doneHeading">เก่งมาก! จำได้ครบทุกคำแล้ว</h2>
       <p id="doneSummary"></p>
       <button class="primary-btn" id="restartBtn">กลับไปเลือกชุดคำศัพท์ใหม่</button>
     </div>
@@ -284,6 +391,20 @@ let state = { filtered: [], queue: [], learned: [], current: null, total: 0 };
 let selUnits = new Set();
 let selCats = new Set();
 let selPos = new Set();
+let currentMode = 'flashcard';
+
+const MODE_HINTS = {
+  flashcard: {
+    big: "🗓️ ควิซสัปดาห์นี้แนะนำ: หน้าที่ 6",
+    sub: "ท่องและควิซอาทิตย์ละ 1 หน้า — ใส่เลขหน้าด้านล่างให้ตรงกับที่ท่องไปแล้ว หรือเลือก Unit/หมวดหมู่เพื่อทบทวนคำเก่าก็ได้",
+    btn: "เริ่มท่องศัพท์ 🚀"
+  },
+  game: {
+    big: "🎮 เกมสะกดคำ: ดูคำแปลแล้วเติมตัวอักษรให้ถูกต้อง",
+    sub: "มีคำแปลและ Part of speech ให้เป็นเบาะแส ทายผิดได้ไม่เกิน 6 ครั้งต่อคำ (แบบ Hangman) กดตัวอักษรบนคีย์บอร์ดหรือพิมพ์จากคีย์บอร์ดจริงก็ได้",
+    btn: "เริ่มเกม 🎮"
+  }
+};
 
 function uniq(arr){ return [...new Set(arr)]; }
 
@@ -368,8 +489,24 @@ function startSession(list){
 
 document.getElementById('startReviewBtn').onclick = ()=>{
   const list = updateReviewCount();
-  startSession(list);
+  if(currentMode === 'game'){
+    startGame(list);
+  } else {
+    startSession(list);
+  }
 };
+
+// ---- Mode toggle ----
+function setMode(mode){
+  currentMode = mode;
+  document.getElementById('modeFlashBtn').classList.toggle('active', mode==='flashcard');
+  document.getElementById('modeGameBtn').classList.toggle('active', mode==='game');
+  document.getElementById('modeHint').textContent = MODE_HINTS[mode].big;
+  document.getElementById('modeHintSub').textContent = MODE_HINTS[mode].sub;
+  document.getElementById('startReviewBtn').textContent = MODE_HINTS[mode].btn;
+}
+document.getElementById('modeFlashBtn').onclick = ()=>setMode('flashcard');
+document.getElementById('modeGameBtn').onclick = ()=>setMode('game');
 
 // ---- Card rendering ----
 function nextCard(){
@@ -441,6 +578,8 @@ document.getElementById('btnNo').onclick = ()=>{
 function showDone(){
   document.getElementById('quizScreen').style.display='none';
   document.getElementById('doneScreen').style.display='block';
+  document.getElementById('doneEmoji').textContent = '🎉🐋';
+  document.getElementById('doneHeading').textContent = 'เก่งมาก! จำได้ครบทุกคำแล้ว';
   document.getElementById('doneSummary').textContent = `จำคำศัพท์ได้ครบทั้งหมด ${state.total} คำ ในชุดนี้ 🎈`;
 }
 
@@ -450,6 +589,222 @@ document.getElementById('backBtn').onclick = ()=>{
 };
 document.getElementById('restartBtn').onclick = ()=>{
   document.getElementById('doneScreen').style.display='none';
+  document.getElementById('setupScreen').style.display='block';
+};
+
+// ================= SPELLING GAME (Hangman-style) =================
+const MAX_LIVES = 6;
+const LIFE_ICON = '🐋';
+let game = {
+  queue: [], total: 0, current: null,
+  cells: [], // {ch, isLetter, guessed, el}
+  wrongCount: 0, solvedWords: [], failedWords: [], keyButtons: {}, active: false
+};
+
+function startGame(list){
+  if(list.length===0) return;
+  game.queue = shuffle(list.slice());
+  game.total = list.length;
+  game.solvedWords = [];
+  game.failedWords = [];
+  game.active = true;
+  document.getElementById('setupScreen').style.display='none';
+  document.getElementById('doneScreen').style.display='none';
+  document.getElementById('gameScreen').style.display='block';
+  buildKeyboard();
+  nextGameWord();
+}
+
+function updateGameProgress(){
+  const attempted = game.solvedWords.length + game.failedWords.length;
+  document.getElementById('gameSolvedCount').textContent = attempted;
+  document.getElementById('gameTotalCount').textContent = game.total;
+  const pct = game.total? Math.round(attempted/game.total*100):0;
+  document.getElementById('gameProgressFill').style.width = pct+'%';
+}
+
+function buildKeyboard(){
+  const kb = document.getElementById('keyboard');
+  kb.innerHTML = '';
+  game.keyButtons = {};
+  'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(letter=>{
+    const btn = document.createElement('button');
+    btn.className = 'key-btn';
+    btn.textContent = letter;
+    btn.onclick = ()=> guessLetter(letter);
+    kb.appendChild(btn);
+    game.keyButtons[letter] = btn;
+  });
+}
+
+function resetKeyboard(){
+  Object.values(game.keyButtons).forEach(btn=>{
+    btn.className = 'key-btn';
+    btn.disabled = false;
+  });
+}
+
+function nextGameWord(){
+  updateGameProgress();
+  document.getElementById('nextWordBtn').style.display = 'none';
+  document.getElementById('skipWordBtn').style.display = 'inline-block';
+  document.getElementById('gameReveal').style.display = 'none';
+  document.getElementById('gameMsg').textContent = '';
+  document.getElementById('gameMsg').className = 'game-msg';
+  resetKeyboard();
+
+  if(game.queue.length===0){ showGameDone(); return; }
+  const card = game.queue.shift();
+  game.current = card;
+  game.wrongCount = 0;
+
+  document.getElementById('gamePageTag').textContent = 'หน้า '+card.p;
+  document.getElementById('gameUnitTag').textContent = 'Unit '+card.u;
+  document.getElementById('gamePos').textContent = card.t;
+  document.getElementById('gameMeaning').textContent = card.m;
+  renderLives();
+
+  const blanksRow = document.getElementById('blanksRow');
+  blanksRow.innerHTML = '';
+  game.cells = [];
+  card.w.split('').forEach(ch=>{
+    const isLetter = /[a-zA-Z]/.test(ch);
+    const box = document.createElement('div');
+    if(isLetter){
+      box.className = 'letter-box';
+      box.textContent = '';
+    } else if(ch === ' '){
+      box.className = 'letter-box space';
+    } else {
+      box.className = 'letter-box';
+      box.textContent = ch; // e.g. hyphen, shown as-is, not guessable
+    }
+    blanksRow.appendChild(box);
+    game.cells.push({ ch, isLetter, guessed: !isLetter, el: box });
+  });
+}
+
+function renderLives(){
+  const remaining = MAX_LIVES - game.wrongCount;
+  const row = document.getElementById('livesRow');
+  row.innerHTML = '';
+  for(let i=0;i<MAX_LIVES;i++){
+    const span = document.createElement('span');
+    span.textContent = LIFE_ICON;
+    if(i >= remaining) span.classList.add('lost');
+    row.appendChild(span);
+  }
+}
+
+function guessLetter(letter){
+  if(!game.active || !game.current) return;
+  const btn = game.keyButtons[letter];
+  if(btn && btn.disabled) return;
+
+  const upper = letter.toUpperCase();
+  let found = false;
+  game.cells.forEach(cell=>{
+    if(cell.isLetter && !cell.guessed && cell.ch.toUpperCase() === upper){
+      cell.guessed = true;
+      cell.el.textContent = cell.ch;
+      cell.el.classList.add('reveal-anim');
+      found = true;
+    }
+  });
+
+  if(btn){ btn.disabled = true; btn.classList.add(found ? 'correct' : 'wrong'); }
+
+  if(found){
+    const allDone = game.cells.every(c=>c.guessed);
+    if(allDone) winGameWord();
+  } else {
+    game.wrongCount++;
+    renderLives();
+    if(game.wrongCount >= MAX_LIVES) loseGameWord();
+  }
+}
+
+function winGameWord(){
+  game.active = false;
+  game.solvedWords.push(game.current);
+  const msg = document.getElementById('gameMsg');
+  msg.textContent = '🎉 เก่งมาก! สะกดถูกต้อง!';
+  msg.className = 'game-msg win';
+  showGameReveal();
+  disableKeyboard();
+  document.getElementById('nextWordBtn').style.display = 'inline-block';
+  document.getElementById('skipWordBtn').style.display = 'none';
+  updateGameProgress();
+}
+
+function loseGameWord(){
+  game.active = false;
+  game.failedWords.push(game.current);
+  game.cells.forEach(cell=>{
+    if(cell.isLetter && !cell.guessed){
+      cell.guessed = true;
+      cell.el.textContent = cell.ch;
+      cell.el.style.color = 'var(--red-dark)';
+    }
+  });
+  const msg = document.getElementById('gameMsg');
+  msg.innerHTML = `😅 หมดโอกาสแล้ว! คำตอบคือ <b>${game.current.w}</b>`;
+  msg.className = 'game-msg lose';
+  showGameReveal();
+  disableKeyboard();
+  document.getElementById('nextWordBtn').style.display = 'inline-block';
+  document.getElementById('skipWordBtn').style.display = 'none';
+  updateGameProgress();
+}
+
+function disableKeyboard(){
+  Object.values(game.keyButtons).forEach(btn=>btn.disabled = true);
+}
+
+function showGameReveal(){
+  document.getElementById('gameExampleEn').textContent = game.current.e;
+  document.getElementById('gameReveal').style.display = 'block';
+}
+
+document.getElementById('nextWordBtn').onclick = ()=>{
+  game.active = true;
+  nextGameWord();
+};
+
+function skipGameWord(){
+  if(!game.active || !game.current) return;
+  const card = game.current;
+  // put the skipped word back into the queue at a random spot further ahead,
+  // so it shuffles back in again later instead of repeating immediately
+  const insertAt = game.queue.length===0 ? 0 : Math.min(game.queue.length, 2+Math.floor(Math.random()*Math.max(1,game.queue.length)));
+  game.queue.splice(insertAt, 0, card);
+  game.active = true;
+  nextGameWord();
+}
+document.getElementById('skipWordBtn').onclick = skipGameWord;
+
+// allow typing on a physical keyboard too
+document.addEventListener('keydown', (e)=>{
+  if(document.getElementById('gameScreen').style.display !== 'block') return;
+  if(!game.active) return;
+  const key = e.key.toUpperCase();
+  if(key.length===1 && key>='A' && key<='Z'){
+    guessLetter(key);
+  }
+});
+
+function showGameDone(){
+  document.getElementById('gameScreen').style.display='none';
+  document.getElementById('doneScreen').style.display='block';
+  document.getElementById('doneEmoji').textContent = '🎮🐋';
+  document.getElementById('doneHeading').textContent = 'เล่นจบแล้ว! เก่งมาก';
+  document.getElementById('doneSummary').textContent =
+    `สะกดถูก ${game.solvedWords.length} คำ จากทั้งหมด ${game.total} คำ (พลาด ${game.failedWords.length} คำ) 🎈`;
+}
+
+document.getElementById('gameBackBtn').onclick = ()=>{
+  game.active = false;
+  document.getElementById('gameScreen').style.display='none';
   document.getElementById('setupScreen').style.display='block';
 };
 
